@@ -42,3 +42,23 @@ func TestRenderIconHalfBlocks(t *testing.T) {
 		t.Errorf("Expected bottom pixel green (0,255,0) in line 0, got %s", lines[0])
 	}
 }
+
+func TestRenderIconHalfBlocks_Scaling(t *testing.T) {
+	// Create a 128x128 image (like yotoicons.com icon 4144)
+	img := image.NewRGBA(image.Rect(0, 0, 128, 128))
+	img.Set(0, 0, color.RGBA{R: 255, G: 0, B: 0, A: 255})
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		t.Fatalf("failed to encode test png: %v", err)
+	}
+
+	lines, err := RenderIconHalfBlocks(buf.Bytes())
+	if err != nil {
+		t.Fatalf("RenderIconHalfBlocks failed on 128x128 image: %v", err)
+	}
+
+	// Should still normalize to 8 lines (16 pixels high)
+	if len(lines) != 8 {
+		t.Errorf("Expected 8 lines after downscaling 128x128 icon, got %d", len(lines))
+	}
+}

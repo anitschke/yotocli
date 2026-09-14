@@ -21,14 +21,33 @@ func RenderIconHalfBlocks(pngData []byte) ([]string, error) {
 	width := bounds.Dx()
 	height := bounds.Dy()
 
+	// Normalize image size down or up to 16x16 if necessary
+	targetW := 16
+	targetH := 16
+	var src image.Image = img
+	if width != targetW || height != targetH {
+		resized := image.NewRGBA(image.Rect(0, 0, targetW, targetH))
+		for ty := 0; ty < targetH; ty++ {
+			sy := bounds.Min.Y + (ty*height)/targetH
+			for tx := 0; tx < targetW; tx++ {
+				sx := bounds.Min.X + (tx*width)/targetW
+				resized.Set(tx, ty, img.At(sx, sy))
+			}
+		}
+		src = resized
+		bounds = resized.Bounds()
+		width = targetW
+		height = targetH
+	}
+
 	var lines []string
 	for y := bounds.Min.Y; y < bounds.Min.Y+height; y += 2 {
 		var sb strings.Builder
 		for x := bounds.Min.X; x < bounds.Min.X+width; x++ {
-			r1, g1, b1, a1 := img.At(x, y).RGBA()
+			r1, g1, b1, a1 := src.At(x, y).RGBA()
 			r2, g2, b2, a2 := uint32(0), uint32(0), uint32(0), uint32(0)
 			if y+1 < bounds.Min.Y+height {
-				r2, g2, b2, a2 = img.At(x, y+1).RGBA()
+				r2, g2, b2, a2 = src.At(x, y+1).RGBA()
 			}
 
 			// RGBA() returns alpha-premultiplied uint32 in [0, 0xffff]. Convert to 8-bit.
