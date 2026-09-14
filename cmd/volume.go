@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -47,11 +48,11 @@ If no device is specified and you have multiple, it will ask or pick the first o
 			// Let's just pick the first online one, or just the first one.
 			targetDeviceID = devices[0].ID
 			if len(devices) > 1 {
-				fmt.Printf("Multiple devices found. Using '%s' (%s).\n", devices[0].Name, targetDeviceID)
+				slog.Info("Multiple devices found, using first device", "device", devices[0].Name, "device_id", targetDeviceID)
 			}
 		}
 
-		fmt.Printf("Setting volume to %d...\n", vol)
+		slog.Info("Setting volume", "level", vol, "device_id", targetDeviceID)
 		return apiClient.SetVolume(targetDeviceID, vol)
 	},
 }

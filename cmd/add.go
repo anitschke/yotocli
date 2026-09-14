@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"log/slog"
 
 	"github.com/spf13/cobra"
 	"github.com/vgaro/yotocli/internal/actions"
@@ -38,9 +38,8 @@ If a position is provided, the track is inserted there. Otherwise, it is appende
 		// Never a sync: adding one file is the opposite of making a playlist
 		// match one file.
 		track := actions.Track{Path: filePath, IconID: addIcon}
-		return actions.AddTracks(apiClient, playlistArg, []actions.Track{track}, false, func(format string, args ...interface{}) {
-			fmt.Printf(format+"\n", args...)
-		})
+		slog.Info("Adding track to playlist", "playlist", playlistArg, "file", filePath)
+		return actions.AddTracks(apiClient, playlistArg, []actions.Track{track}, false)
 	},
 }
 

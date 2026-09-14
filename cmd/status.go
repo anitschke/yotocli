@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"text/tabwriter"
 
@@ -16,7 +17,7 @@ var statusCmd = &cobra.Command{
 	Example: `  # Check status of all players
   yoto status`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Fetching devices...")
+		slog.Debug("Fetching devices...")
 
 		devices, err := apiClient.ListDevices()
 		if err != nil {
@@ -39,7 +40,7 @@ var statusCmd = &cobra.Command{
 				status, err := apiClient.GetDeviceStatus(devices[i].ID)
 				if err != nil {
 					// Don't fail the whole command if one device fails
-					fmt.Printf("Warning: Failed to fetch status for %s: %v\n", devices[i].Name, err)
+					slog.Warn("Failed to fetch status for device", "device", devices[i].Name, "error", err)
 					return nil
 				}
 				devices[i].Status = status

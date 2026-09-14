@@ -1,11 +1,11 @@
 package actions
 
 import (
+	"log/slog"
+
 	"github.com/vgaro/yotocli/internal/processing"
 	"github.com/vgaro/yotocli/pkg/yoto"
 )
-
-type Logger func(string, ...interface{})
 
 // ImportFromURL downloads everything a URL holds and adds it to one playlist.
 //
@@ -13,24 +13,20 @@ type Logger func(string, ...interface{})
 // to, which is how a feed that has gained an episode is re-imported without
 // ending up with two copies of every old one. See AddTracks for what that keeps
 // and what it removes.
-func ImportFromURL(client *yoto.Client, url string, playlistName string, syncPlaylist bool, log Logger) error {
-	if log == nil {
-		log = func(s string, i ...interface{}) {}
-	}
-
-	log("Downloading audio from %s...", url)
+func ImportFromURL(client *yoto.Client, url string, playlistName string, syncPlaylist bool) error {
+	slog.Info("Downloading audio from URL", "url", url)
 	downloads, cleanup, err := processing.DownloadFromURL(url)
 	defer func() {
 		if err := cleanup(); err != nil {
-			log("Warning: failed to remove downloaded files: %v", err)
+			slog.Warn("Failed to remove downloaded files", "error", err)
 		}
 	}()
 	if err != nil {
 		return err
 	}
 
-	log("Downloaded %d track(s)", len(downloads))
-
+	slog.Info("Downloaded tracks from URL", "count", len(downloads))
+	
 	// If no playlist specified, use the title of the first download
 	targetPlaylist := playlistName
 	if targetPlaylist == "" {
@@ -45,5 +41,5 @@ func ImportFromURL(client *yoto.Client, url string, playlistName string, syncPla
 		tracks[i] = Track{Path: d.Path, Title: d.Name}
 	}
 
-	return AddTracks(client, targetPlaylist, tracks, syncPlaylist, log)
+	return AddTracks(client, targetPlaylist, tracks, syncPlaylist)
 }

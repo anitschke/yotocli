@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,6 +15,8 @@ import (
 
 var (
 	cfgFile   string
+	logLevel  string
+	logFormat string
 	apiClient *yoto.Client
 )
 
@@ -24,6 +27,8 @@ var rootCmd = &cobra.Command{
 	Long: `YotoCLI is a tool for advanced users to manage their Yoto library.
 It allows for uploading files, creating playlists, and managing device state directly from the terminal.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		initLogger()
+
 		// Initialize the API client with the token from config
 		token := config.GetAccessToken()
 		clientID := config.GetClientID()
@@ -34,7 +39,7 @@ It allows for uploading files, creating playlists, and managing device state dir
 		if token != "" {
 			_, err := apiClient.ListDevices()
 			if err != nil && (strings.Contains(err.Error(), "unauthorized") || strings.Contains(err.Error(), "401")) {
-				fmt.Println("Access token expired. Attempting refresh...")
+				slog.Info("Access token expired, attempting refresh")
 				refreshToken := config.GetRefreshToken()
 				if refreshToken == "" {
 					return fmt.Errorf("authentication expired and no refresh token found. Please run 'yoto login'")
@@ -59,7 +64,7 @@ It allows for uploading files, creating playlists, and managing device state dir
 
 				// Re-init client with new token
 				apiClient = yoto.NewClient(newTokens.AccessToken, clientID)
-				fmt.Println("Token successfully refreshed.")
+				slog.Info("Token successfully refreshed")
 			}
 		}
 
@@ -72,7 +77,7 @@ func Execute() {
 	defer func() {
 		if apiClient != nil {
 			if err := apiClient.Close(); err != nil {
-				fmt.Fprintf(os.Stderr, "Warning: failed to close client: %v\n", err)
+				slog.Warn("Failed to close client", "error", err)
 			}
 		}
 	}()
@@ -88,10 +93,15 @@ func RootCmd() *cobra.Command {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig, initLogger)
 
 	// Persistent flags (available to all commands)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/yotocli/config.yaml)")
+	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "warn", "log level (debug, info, warn, error)")
+	rootCmd.PersistentFlags().StringVar(&logFormat, "log-format", "text", "log format (text, json)")
+
+	_ = viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
+	_ = viper.BindPFlag("log-format", rootCmd.PersistentFlags().Lookup("log-format"))
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -112,10 +122,57 @@ func initConfig() {
 		viper.SetConfigType("yaml")
 	}
 
+	viper.BindEnv("log-level", "YOTO_LOG_LEVEL", "LOG_LEVEL")
+	viper.BindEnv("log-format", "YOTO_LOG_FORMAT", "LOG_FORMAT")
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		// fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func initLogger() {
+	lvlStr := viper.GetString("log-level")
+	if lvlStr == "" {
+		lvlStr = logLevel
+	}
+	if lvlStr == "" {
+		lvlStr = "warn"
+	}
+
+	var level slog.Level
+	switch strings.ToLower(strings.TrimSpace(lvlStr)) {
+	case "debug":
+		level = slog.LevelDebug
+	case "info":
+		level = slog.LevelInfo
+	case "warn", "warning":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelWarn
+	}
+
+	fmtStr := viper.GetString("log-format")
+	if fmtStr == "" {
+		fmtStr = logFormat
+	}
+	if fmtStr == "" {
+		fmtStr = "text"
+	}
+
+	opts := &slog.HandlerOptions{
+		Level: level,
+	}
+
+	var handler slog.Handler
+	if strings.ToLower(strings.TrimSpace(fmtStr)) == "json" {
+		handler = slog.NewJSONHandler(os.Stderr, opts)
+	} else {
+		handler = slog.NewTextHandler(os.Stderr, opts)
+	}
+
+	slog.SetDefault(slog.New(handler))
 }

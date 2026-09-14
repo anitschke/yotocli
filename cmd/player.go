@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -51,11 +52,11 @@ var playCmd = &cobra.Command{
 		} else {
 			targetDeviceID = devices[0].ID
 			if len(devices) > 1 {
-				fmt.Printf("Multiple devices found. Using '%s' (%s).\n", devices[0].Name, targetDeviceID)
+				slog.Info("Multiple devices found, using first device", "device", devices[0].Name, "device_id", targetDeviceID)
 			}
 		}
 
-		fmt.Printf("Playing '%s' on device %s...\n", card.Title, targetDeviceID)
+		slog.Info("Playing card on device", "title", card.Title, "device_id", targetDeviceID)
 		return apiClient.PlayCard(targetDeviceID, card.CardID)
 	},
 }
@@ -91,7 +92,7 @@ var stopCmd = &cobra.Command{
 			targetDeviceID = devices[0].ID
 		}
 
-		fmt.Printf("Stopping playback on device %s...\n", targetDeviceID)
+		slog.Info("Stopping playback on device", "device_id", targetDeviceID)
 		return apiClient.StopPlayer(targetDeviceID)
 	},
 }
@@ -127,7 +128,7 @@ var pauseCmd = &cobra.Command{
 			targetDeviceID = devices[0].ID
 		}
 
-		fmt.Printf("Pausing playback on device %s...\n", targetDeviceID)
+		slog.Info("Pausing playback on device", "device_id", targetDeviceID)
 		return apiClient.PausePlayer(targetDeviceID)
 	},
 }

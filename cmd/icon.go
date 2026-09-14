@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/spf13/cobra"
 	"github.com/vgaro/yotocli/internal/actions"
@@ -18,15 +19,15 @@ var uploadIconCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		source := args[0]
-		fmt.Printf("Uploading icon from %s...\n", source)
+		slog.Info("Uploading icon", "source", source)
 
 		id, err := actions.UploadIcon(apiClient, source)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("Icon uploaded successfully!\nID: %s\n", id)
-		fmt.Printf("Use this ID with 'yoto edit' or 'yoto icon set'.\n")
+		slog.Info("Icon uploaded successfully", "id", id)
+		fmt.Println(id)
 		return nil
 	},
 }

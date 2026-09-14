@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -115,7 +116,7 @@ var mvCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("Moving track %d from '%s' to '%s' position %d...\n", srcIdx+1, srcCard.Title, destCardID, destPos)
+		slog.Info("Moving track", "src_track", srcIdx+1, "src_card", srcCard.Title, "dest_card_id", destCardID, "dest_pos", destPos)
 		return actions.MoveTrack(apiClient, srcCard.CardID, srcIdx+1, destCardID, destPos)
 	},
 }
@@ -156,7 +157,7 @@ var cpCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("Copying track %d from '%s' to '%s' position %d...\n", srcIdx+1, srcCard.Title, destCardRef.Title, destPos)
+		slog.Info("Copying track", "src_track", srcIdx+1, "src_card", srcCard.Title, "dest_card", destCardRef.Title, "dest_pos", destPos)
 		return actions.CopyTrack(apiClient, srcCard.CardID, srcIdx+1, destCardRef.CardID, destPos)
 	},
 }

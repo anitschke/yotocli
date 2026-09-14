@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -126,7 +127,7 @@ application at https://dashboard.yoto.dev/.`,
 		}
 
 		if tokenResp.RefreshToken == "" {
-			fmt.Println("Warning: no refresh token was issued. Check that the 'offline_access' scope is enabled for your application.")
+			slog.Warn("No refresh token was issued. Check that the 'offline_access' scope is enabled for your application.")
 		}
 
 		fmt.Println("Successfully authenticated!")

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"log/slog"
 
 	"github.com/spf13/cobra"
 	"github.com/vgaro/yotocli/internal/actions"
@@ -49,9 +49,8 @@ it is the upload to Yoto that a sync skips.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		url := args[0]
-		return actions.ImportFromURL(apiClient, url, importPlaylist, importSync, func(format string, args ...interface{}) {
-			fmt.Printf(format+"\n", args...)
-		})
+		slog.Info("Importing audio from URL", "url", url, "playlist", importPlaylist, "sync", importSync)
+		return actions.ImportFromURL(apiClient, url, importPlaylist, importSync)
 	},
 }
 

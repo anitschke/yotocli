@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -62,23 +63,23 @@ var editCmd = &cobra.Command{
 			// Edit Playlist
 			changed := false
 			if editName != "" {
-				fmt.Printf("Updating Title: '%s' -> '%s'\n", fullCard.Title, editName)
+				slog.Info("Updating title", "from", fullCard.Title, "to", editName)
 				fullCard.Title = editName
 				changed = true
 			}
 			if editAuthor != "" {
-				fmt.Printf("Updating Author: '%s' -> '%s'\n", fullCard.Metadata.Author, editAuthor)
+				slog.Info("Updating author", "from", fullCard.Metadata.Author, "to", editAuthor)
 				fullCard.Metadata.Author = editAuthor
 				changed = true
 			}
 			if editDescription != "" {
-				fmt.Printf("Updating Description\n")
+				slog.Info("Updating description")
 				fullCard.Metadata.Description = editDescription
 				changed = true
 			}
 
 			if !changed {
-				fmt.Println("No changes to apply.")
+				slog.Info("No changes to apply")
 				return nil
 			}
 
@@ -93,11 +94,11 @@ var editCmd = &cobra.Command{
 		}
 
 		if editAuthor != "" || editDescription != "" {
-			fmt.Println("Warning: --author and --description are ignored for tracks.")
+			slog.Warn("--author and --description are ignored for tracks")
 		}
 
 		if editName != "" {
-			fmt.Printf("Renaming track '%s' to '%s'...\n", chapter.Title, editName)
+			slog.Info("Renaming track", "from", chapter.Title, "to", editName)
 			chapter.Title = editName
 			if len(chapter.Tracks) > 0 {
 				chapter.Tracks[0].Title = editName

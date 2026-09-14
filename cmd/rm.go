@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -39,7 +40,7 @@ Fuzzy matching is supported for playlist and track names.`,
 
 		if len(parts) == 1 {
 			// Remove entire playlist
-			fmt.Printf("Removing playlist: %s (%s)...\n", card.Title, card.CardID)
+			slog.Info("Removing playlist", "title", card.Title, "card_id", card.CardID)
 			return apiClient.DeleteCard(card.CardID)
 		}
 
@@ -55,7 +56,7 @@ Fuzzy matching is supported for playlist and track names.`,
 			return fmt.Errorf("track not found: %s", trackQuery)
 		}
 
-		fmt.Printf("Removing track: %s\n", fullCard.Content.Chapters[idx].Title)
+		slog.Info("Removing track", "title", fullCard.Content.Chapters[idx].Title)
 		return actions.RemoveTrack(apiClient, card.CardID, idx+1)
 	},
 }

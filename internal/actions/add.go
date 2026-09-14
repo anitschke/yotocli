@@ -2,9 +2,9 @@ package actions
 
 import (
 	"fmt"
+	"log/slog"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/vgaro/yotocli/internal/utils"
 	"github.com/vgaro/yotocli/pkg/yoto"
@@ -51,24 +51,12 @@ type Track struct {
 //
 // A failure in any upload abandons the whole batch: the card is only written
 // after every upload has succeeded, so a playlist is never left half filled in.
-func AddTracks(client *yoto.Client, playlistQuery string, tracks []Track, syncPlaylist bool, log Logger) error {
-	if log == nil {
-		log = func(s string, i ...interface{}) {}
-	}
+func AddTracks(client *yoto.Client, playlistQuery string, tracks []Track, syncPlaylist bool) error {
 	if len(tracks) == 0 {
 		return fmt.Errorf("no files to add")
 	}
 
-	// Uploads report progress from their own goroutines, so serialize the
-	// callback rather than trusting every caller's logger to be safe for it.
-	var logMu sync.Mutex
-	logf := func(format string, args ...interface{}) {
-		logMu.Lock()
-		defer logMu.Unlock()
-		log(format, args...)
-	}
-
-	targetCard, position, err := findOrCreateCard(client, playlistQuery, logf)
+	targetCard, position, err := findOrCreateCard(client, playlistQuery)
 	if err != nil {
 		return err
 	}
@@ -85,7 +73,7 @@ func AddTracks(client *yoto.Client, playlistQuery string, tracks []Track, syncPl
 	for i, track := range tracks {
 		g.Go(func() error {
 			name := trackTitle(track.Title, track.Path)
-			logf("%sUploading %s...", progress(i, len(tracks)), name)
+			slog.Debug("Uploading track", "track", name, "index", i+1, "total", len(tracks))
 
 			chapter, sent, err := uploadChapter(client, track)
 			if err != nil {
@@ -94,11 +82,11 @@ func AddTracks(client *yoto.Client, playlistQuery string, tracks []Track, syncPl
 
 			chapters[i] = chapter
 			if sent {
-				logf("%sUploaded %s", progress(i, len(tracks)), name)
+				slog.Debug("Uploaded track", "track", name, "index", i+1, "total", len(tracks))
 			} else {
 				// Worth saying, because it is the difference between a sync
 				// that re-sent a whole feed and one that only sent what was new.
-				logf("%sAlready on Yoto, nothing sent: %s", progress(i, len(tracks)), name)
+				slog.Debug("Track already on Yoto, nothing sent", "track", name, "index", i+1, "total", len(tracks))
 			}
 			return nil
 		})
@@ -115,10 +103,10 @@ func AddTracks(client *yoto.Client, playlistQuery string, tracks []Track, syncPl
 	setMediaTotals(targetCard)
 
 	if targetCard.CardID != "" {
-		logf("Updating playlist '%s'...", targetCard.Title)
+		slog.Info("Updating playlist", "title", targetCard.Title, "card_id", targetCard.CardID)
 		return client.UpdateCard(targetCard.CardID, targetCard)
 	}
-	logf("Creating playlist '%s'...", targetCard.Title)
+	slog.Info("Creating playlist", "title", targetCard.Title)
 	return client.CreateCard(targetCard)
 }
 
@@ -126,7 +114,7 @@ func AddTracks(client *yoto.Client, playlistQuery string, tracks []Track, syncPl
 // tracks should go on, fetched in full so chapters can be added to what is
 // already there, along with the 0-based position they belong at (-1 to append).
 // A playlist that does not exist yet comes back unsaved, without a CardID.
-func findOrCreateCard(client *yoto.Client, playlistQuery string, log Logger) (*yoto.Card, int, error) {
+func findOrCreateCard(client *yoto.Client, playlistQuery string) (*yoto.Card, int, error) {
 	parts := strings.Split(playlistQuery, "/")
 	cardName := parts[0]
 	position := -1
@@ -144,7 +132,7 @@ func findOrCreateCard(client *yoto.Client, playlistQuery string, log Logger) (*y
 
 	existingCard := utils.FindCard(cards, cardName)
 	if existingCard == nil {
-		log("Playlist '%s' not found. Creating it...", cardName)
+		slog.Info("Playlist not found, creating it", "name", cardName)
 		return &yoto.Card{
 			Title:   cardName,
 			Content: &yoto.Content{},

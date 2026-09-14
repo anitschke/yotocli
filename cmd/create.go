@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -61,11 +62,11 @@ audio rather than their name, so a renamed file keeps its icon.`,
 			return fmt.Errorf("no audio files found in %s", dir)
 		}
 
-		verb := "Creating"
+		verb := "creating"
 		if createSync {
-			verb = "Syncing"
+			verb = "syncing"
 		}
-		fmt.Printf("%s playlist '%s' with %d tracks...\n", verb, createName, len(audioFiles))
+		slog.Info("Processing playlist", "action", verb, "name", createName, "tracks", len(audioFiles))
 
 		// No titles: these are files the user named themselves, so the file
 		// name is the best guess we have.
@@ -74,9 +75,7 @@ audio rather than their name, so a renamed file keeps its icon.`,
 			tracks[i] = actions.Track{Path: path}
 		}
 
-		return actions.AddTracks(apiClient, createName, tracks, createSync, func(format string, args ...interface{}) {
-			fmt.Printf(format+"\n", args...)
-		})
+		return actions.AddTracks(apiClient, createName, tracks, createSync)
 	},
 }
 

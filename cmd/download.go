@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,7 +74,7 @@ If downloading a track, it saves as an MP3 file.`,
 				dest = filepath.Join(dest, fmt.Sprintf("%s.mp3", utils.SanitizeFilename(track.Title)))
 			}
 
-			fmt.Printf("Downloading '%s' to '%s'...\n", track.Title, dest)
+			slog.Info("Downloading track", "title", track.Title, "dest", dest)
 			return apiClient.DownloadFile(track.TrackURL, dest)
 		}
 
@@ -86,10 +87,10 @@ If downloading a track, it saves as an MP3 file.`,
 			return err
 		}
 
-		fmt.Printf("Downloading playlist '%s' to '%s'...\n", fullCard.Title, dest)
+		slog.Info("Downloading playlist", "title", fullCard.Title, "dest", dest)
 
 		if fullCard.Content == nil || len(fullCard.Content.Chapters) == 0 {
-			fmt.Println("Playlist is empty.")
+			slog.Warn("Playlist is empty", "title", fullCard.Title)
 			return nil
 		}
 
@@ -111,7 +112,7 @@ If downloading a track, it saves as an MP3 file.`,
 				filename := fmt.Sprintf("%02d - %s.mp3", n, utils.SanitizeFilename(t.Title))
 				path := filepath.Join(dest, filename)
 
-				fmt.Printf("[%d/%d] Downloading %s...\n", n, len(fullCard.Content.Chapters), t.Title)
+				slog.Debug("Downloading track", "index", n, "total", len(fullCard.Content.Chapters), "title", t.Title)
 				if err := apiClient.DownloadFile(t.TrackURL, path); err != nil {
 					return fmt.Errorf("failed to download %s: %w", t.Title, err)
 				}
