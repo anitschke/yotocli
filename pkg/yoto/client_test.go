@@ -28,7 +28,7 @@ func TestListCards(t *testing.T) {
 
 	// 2. Point client to mock server
 	client := NewClient("fake-token", "fake-client-id")
-	client.http.SetBaseURL(server.URL)
+	client.SetBaseURL(server.URL)
 
 	// 3. Run test
 	cards, err := client.ListCards()
@@ -58,7 +58,7 @@ func TestGetCard(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("fake-token", "fake-client-id")
-	client.http.SetBaseURL(server.URL)
+	client.SetBaseURL(server.URL)
 
 	card, err := client.GetCard("card1")
 	if err != nil {
@@ -123,7 +123,7 @@ func TestUpdateCard(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("fake-token", "fake-client-id")
-	client.http.SetBaseURL(server.URL)
+	client.SetBaseURL(server.URL)
 
 	card := &Card{
 		CardID: "card1",
@@ -182,7 +182,7 @@ func TestListDevices(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient("fake-token", "fake-client-id")
-	client.http.SetBaseURL(server.URL)
+	client.SetBaseURL(server.URL)
 
 	devices, err := client.ListDevices()
 	if err != nil {
@@ -194,28 +194,5 @@ func TestListDevices(t *testing.T) {
 	}
 	if devices[0].Name != "Yoto Mini" {
 		t.Errorf("Expected 'Yoto Mini', got %s", devices[0].Name)
-	}
-}
-
-func TestGetDeviceStatus(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"status": {"batteryLevel": 85, "isCharging": 1, "activeCard": "none"}}`)
-	}))
-	defer server.Close()
-
-	client := NewClient("fake-token", "fake-client-id")
-	client.http.SetBaseURL(server.URL)
-
-	status, err := client.GetDeviceStatus("dev1")
-	if err != nil {
-		t.Fatalf("GetDeviceStatus failed: %v", err)
-	}
-
-	if status.BatteryLevel != 85 {
-		t.Errorf("Expected battery 85, got %d", status.BatteryLevel)
-	}
-	if status.IsCharging != 1 {
-		t.Errorf("Expected charging, got %d", status.IsCharging)
 	}
 }

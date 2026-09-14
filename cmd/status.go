@@ -67,7 +67,7 @@ var statusCmd = &cobra.Command{
 
 			if d.Status != nil {
 				charging := ""
-				if d.Status.IsCharging == 1 {
+				if d.Status.Charging {
 					charging = "⚡ "
 				}
 				batteryStr = fmt.Sprintf("%d%%%s", d.Status.BatteryLevel, charging)

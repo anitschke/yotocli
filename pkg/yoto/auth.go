@@ -89,7 +89,7 @@ type TokenResponse struct {
 
 // AuthorizeURLFor builds the browser URL that starts the authorization code
 // flow with PKCE.
-func (c *Client) AuthorizeURLFor(challenge, state string) string {
+func (c *HTTPClient) AuthorizeURLFor(challenge, state string) string {
 	q := url.Values{}
 	q.Set("response_type", "code")
 	q.Set("client_id", c.clientID)
@@ -104,7 +104,7 @@ func (c *Client) AuthorizeURLFor(challenge, state string) string {
 }
 
 // ExchangeCode trades an authorization code plus its PKCE verifier for tokens.
-func (c *Client) ExchangeCode(code, verifier string) (*TokenResponse, error) {
+func (c *HTTPClient) ExchangeCode(code, verifier string) (*TokenResponse, error) {
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("client_id", c.clientID)
@@ -129,7 +129,7 @@ func (c *Client) ExchangeCode(code, verifier string) (*TokenResponse, error) {
 }
 
 // RefreshToken exchanges a refresh token for a new access token
-func (c *Client) RefreshToken(refreshToken string) (*TokenResponse, error) {
+func (c *HTTPClient) RefreshToken(refreshToken string) (*TokenResponse, error) {
 	data := url.Values{}
 	data.Set("grant_type", "refresh_token")
 	data.Set("client_id", c.clientID)

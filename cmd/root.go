@@ -69,6 +69,13 @@ It allows for uploading files, creating playlists, and managing device state dir
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
+	defer func() {
+		if apiClient != nil {
+			if err := apiClient.Close(); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: failed to close client: %v\n", err)
+			}
+		}
+	}()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

@@ -73,7 +73,7 @@ func FileSHA256(path string) (string, error) {
 // does, the response carries no upload URL and the upload can be skipped, which
 // is what keeps re-importing a podcast feed from sending every old episode
 // again. Both may be empty, which always gets a fresh upload URL back.
-func (c *Client) GetUploadURL(sha256Hash string, filename string) (*UploadURLResponse, error) {
+func (c *HTTPClient) GetUploadURL(sha256Hash string, filename string) (*UploadURLResponse, error) {
 	var result UploadURLResponse
 
 	req := c.http.R().SetResult(&result)
@@ -95,7 +95,7 @@ func (c *Client) GetUploadURL(sha256Hash string, filename string) (*UploadURLRes
 }
 
 // UploadFile PUTs a local file to a signed upload URL.
-func (c *Client) UploadFile(path string, uploadURL string) error {
+func (c *HTTPClient) UploadFile(path string, uploadURL string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func (c *Client) UploadFile(path string, uploadURL string) error {
 
 // PollTranscode waits for Yoto to finish processing an upload, giving up after
 // transcodeTimeout.
-func (c *Client) PollTranscode(uploadID string) (*TranscodeData, error) {
+func (c *HTTPClient) PollTranscode(uploadID string) (*TranscodeData, error) {
 	deadline := time.Now().Add(transcodeTimeout)
 
 	for {

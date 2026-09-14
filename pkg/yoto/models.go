@@ -1,6 +1,8 @@
 package yoto
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -99,18 +101,100 @@ type Device struct {
 }
 
 type DeviceStatus struct {
-	BatteryLevel int    `json:"batteryLevel"`
-	IsCharging   int    `json:"isCharging"` // 0=No, 1=Yes
-	ActiveCard   string `json:"activeCard"` // "none" or card ID
-	Volume       int    `json:"volume"`
+	StatusVersion  int    `json:"statusVersion,omitempty"`
+	FwVersion      string `json:"fwVersion,omitempty"`
+	ProductType    string `json:"productType,omitempty"`
+	BatteryLevel   int    `json:"batteryLevel"`
+	Charging       bool   `json:"charging"`
+	FreeDisk       int    `json:"freeDisk,omitempty"`
+	ALS            int    `json:"als,omitempty"`
+	ActiveCard     string `json:"activeCard"`
+	CardInserted   bool   `json:"cardInserted,omitempty"`
+	PlayingStatus  string `json:"playingStatus,omitempty"`
+	Headphones     bool   `json:"headphones,omitempty"`
+	BluetoothHp    bool   `json:"bluetoothHp,omitempty"`
+	Volume         int    `json:"volume"`
+	UserVolume     int    `json:"userVolume,omitempty"`
+	TimeFormat     string `json:"timeFormat,omitempty"`
+	NightlightMode string `json:"nightlightMode,omitempty"`
+	Day            bool   `json:"day,omitempty"`
+}
+
+// UnmarshalJSON handles both the schema documented in API specs (bools/strings)
+// and the schema sent by physical devices (0/1 integers for booleans).
+func (s *DeviceStatus) UnmarshalJSON(data []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	getInt := func(k string) int {
+		if v, ok := raw[k].(float64); ok {
+			return int(v)
+		}
+		return 0
+	}
+	getString := func(k string) string {
+		if v, ok := raw[k].(string); ok {
+			return v
+		}
+		return ""
+	}
+	getBool := func(k string) bool {
+		switch v := raw[k].(type) {
+		case bool:
+			return v
+		case float64:
+			return v != 0
+		case string:
+			return strings.ToLower(v) == "true" || v == "1"
+		default:
+			return false
+		}
+	}
+	getPlayingStatus := func() string {
+		switch v := raw["playingStatus"].(type) {
+		case string:
+			return v
+		case float64:
+			switch int(v) {
+			case 0:
+				return "stopped"
+			case 1:
+				return "playing"
+			case 2:
+				return "paused"
+			default:
+				return fmt.Sprintf("%d", int(v))
+			}
+		default:
+			return ""
+		}
+	}
+
+	s.StatusVersion = getInt("statusVersion")
+	s.FwVersion = getString("fwVersion")
+	s.ProductType = getString("productType")
+	s.BatteryLevel = getInt("batteryLevel")
+	s.Charging = getBool("charging")
+	s.FreeDisk = getInt("freeDisk")
+	s.ALS = getInt("als")
+	s.ActiveCard = getString("activeCard")
+	s.CardInserted = getBool("cardInserted")
+	s.PlayingStatus = getPlayingStatus()
+	s.Headphones = getBool("headphones")
+	s.BluetoothHp = getBool("bluetoothHp")
+	s.Volume = getInt("volume")
+	s.UserVolume = getInt("userVolume")
+	s.TimeFormat = getString("timeFormat")
+	s.NightlightMode = getString("nightlightMode")
+	s.Day = getBool("day")
+
+	return nil
 }
 
 type DevicesResponse struct {
 	Devices []Device `json:"devices"`
-}
-
-type DeviceStatusResponse struct {
-	Status DeviceStatus `json:"status"`
 }
 
 // AudioSHA256 identifies the audio a track plays: the SHA-256 of its transcoded

@@ -36,7 +36,7 @@ func newTestClient(t *testing.T, handler http.HandlerFunc) *Client {
 	t.Cleanup(server.Close)
 
 	client := NewClient("fake-token", "fake-client-id")
-	client.http.SetBaseURL(server.URL)
+	client.SetBaseURL(server.URL)
 	return client
 }
 
