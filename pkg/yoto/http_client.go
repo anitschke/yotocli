@@ -108,6 +108,55 @@ func (c *HTTPClient) UploadIcon(path string) (string, error) {
 	return result.ID, nil
 }
 
+func (c *HTTPClient) GetPublicIcons() ([]DisplayIcon, error) {
+	var result DisplayIconsResponse
+	resp, err := c.http.R().
+		SetResult(&result).
+		Get("/media/displayIcons/user/yoto")
+
+	if err != nil {
+		return nil, err
+	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("api error: %s", resp.String())
+	}
+
+	return result.DisplayIcons, nil
+}
+
+func (c *HTTPClient) GetUserIcons() ([]DisplayIcon, error) {
+	var result DisplayIconsResponse
+	resp, err := c.http.R().
+		SetResult(&result).
+		Get("/media/displayIcons/user/me")
+
+	if err != nil {
+		return nil, err
+	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("api error: %s", resp.String())
+	}
+
+	return result.DisplayIcons, nil
+}
+
+func (c *HTTPClient) FetchBytes(url string) ([]byte, error) {
+	resp, err := c.http.R().
+		SetDoNotParseResponse(true).
+		Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+	defer resp.RawBody().Close()
+
+	if resp.IsError() {
+		return nil, fmt.Errorf("download failed: %s", resp.Status())
+	}
+
+	return io.ReadAll(resp.RawBody())
+}
+
 func (c *HTTPClient) UpdateCard(id string, card *Card) error { // Sanitize icons: Convert https URLs back to yoto:#hash format
 	sanitizeCardForUpdate(card)
 

@@ -14,6 +14,9 @@ type YotoClient interface {
 	UpdateCard(id string, card *Card) error
 	DownloadFile(url string, destPath string) error
 	UploadIcon(path string) (string, error)
+	GetPublicIcons() ([]DisplayIcon, error)
+	GetUserIcons() ([]DisplayIcon, error)
+	FetchBytes(url string) ([]byte, error)
 	GetUploadURL(sha256Hash string, filename string) (*UploadURLResponse, error)
 	UploadFile(path string, uploadURL string) error
 	PollTranscode(uploadID string) (*TranscodeData, error)
@@ -82,6 +85,9 @@ func (c *Client) DownloadFile(url string, destPath string) error {
 	return c.httpClient.DownloadFile(url, destPath)
 }
 func (c *Client) UploadIcon(path string) (string, error) { return c.httpClient.UploadIcon(path) }
+func (c *Client) GetPublicIcons() ([]DisplayIcon, error)  { return c.httpClient.GetPublicIcons() }
+func (c *Client) GetUserIcons() ([]DisplayIcon, error)    { return c.httpClient.GetUserIcons() }
+func (c *Client) FetchBytes(url string) ([]byte, error)   { return c.httpClient.FetchBytes(url) }
 func (c *Client) GetUploadURL(hash string, filename string) (*UploadURLResponse, error) {
 	return c.httpClient.GetUploadURL(hash, filename)
 }

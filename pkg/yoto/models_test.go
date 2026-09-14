@@ -89,3 +89,20 @@ func TestIconRef(t *testing.T) {
 		})
 	}
 }
+
+func TestParseMediaID(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"yoto:#7Wt--qhx9t7PCSC8WBmGKJvlG53Z1uk7bN1dE9wGWJ0", "7Wt--qhx9t7PCSC8WBmGKJvlG53Z1uk7bN1dE9wGWJ0"},
+		{"https://media-secure-v2-test.aws.fooropa.com/icons/7Wt--qhx9t7PCSC8WBmGKJvlG53Z1uk7bN1dE9wGWJ0", "7Wt--qhx9t7PCSC8WBmGKJvlG53Z1uk7bN1dE9wGWJ0"},
+		{"https://media-secure-v2-test.aws.fooropa.com/icons/7Wt--qhx9t7PCSC8WBmGKJvlG53Z1uk7bN1dE9wGWJ0?foo=bar", "7Wt--qhx9t7PCSC8WBmGKJvlG53Z1uk7bN1dE9wGWJ0"},
+		{"7Wt--qhx9t7PCSC8WBmGKJvlG53Z1uk7bN1dE9wGWJ0", "7Wt--qhx9t7PCSC8WBmGKJvlG53Z1uk7bN1dE9wGWJ0"},
+	}
+	for _, tt := range tests {
+		if got := ParseMediaID(tt.input); got != tt.want {
+			t.Errorf("ParseMediaID(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}

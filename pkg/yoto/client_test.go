@@ -196,3 +196,79 @@ func TestListDevices(t *testing.T) {
 		t.Errorf("Expected 'Yoto Mini', got %s", devices[0].Name)
 	}
 }
+
+func TestGetPublicIcons(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/media/displayIcons/user/yoto" {
+			t.Errorf("Expected path /media/displayIcons/user/yoto, got %s", r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{
+			"displayIcons": [
+				{
+					"displayIconId": "icon1",
+					"mediaId": "hash1",
+					"title": "Seedling",
+					"url": "https://example.com/hash1",
+					"userId": "yoto",
+					"public": true,
+					"new": true,
+					"publicTags": ["happy", "plant"]
+				}
+			]
+		}`)
+	}))
+	defer server.Close()
+
+	client := NewClient("fake-token", "fake-client-id")
+	client.SetBaseURL(server.URL)
+
+	icons, err := client.GetPublicIcons()
+	if err != nil {
+		t.Fatalf("GetPublicIcons failed: %v", err)
+	}
+	if len(icons) != 1 {
+		t.Fatalf("Expected 1 icon, got %d", len(icons))
+	}
+	if icons[0].Title != "Seedling" {
+		t.Errorf("Expected title 'Seedling', got %s", icons[0].Title)
+	}
+	if len(icons[0].PublicTags) != 2 {
+		t.Errorf("Expected 2 public tags, got %d", len(icons[0].PublicTags))
+	}
+}
+
+func TestGetUserIcons(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/media/displayIcons/user/me" {
+			t.Errorf("Expected path /media/displayIcons/user/me, got %s", r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{
+			"displayIcons": [
+				{
+					"displayIconId": "user-icon-1",
+					"mediaId": "hash-user-1",
+					"url": "https://example.com/user1",
+					"userId": "user123",
+					"public": false
+				}
+			]
+		}`)
+	}))
+	defer server.Close()
+
+	client := NewClient("fake-token", "fake-client-id")
+	client.SetBaseURL(server.URL)
+
+	icons, err := client.GetUserIcons()
+	if err != nil {
+		t.Fatalf("GetUserIcons failed: %v", err)
+	}
+	if len(icons) != 1 {
+		t.Fatalf("Expected 1 icon, got %d", len(icons))
+	}
+	if icons[0].DisplayIconID != "user-icon-1" {
+		t.Errorf("Expected DisplayIconID 'user-icon-1', got %s", icons[0].DisplayIconID)
+	}
+}

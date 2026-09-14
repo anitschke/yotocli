@@ -237,3 +237,33 @@ func IconRef(icon string) string {
 // sha256RefLength is how long a SHA-256 is once Yoto has written it out: 32 bytes
 // in unpadded base64url.
 const sha256RefLength = 43
+
+// ParseMediaID extracts the media ID (base64url hash) from an icon URL or reference.
+func ParseMediaID(icon string) string {
+	if strings.HasPrefix(icon, "yoto:#") {
+		return strings.TrimPrefix(icon, "yoto:#")
+	}
+	clean, _, _ := strings.Cut(icon, "?")
+	if idx := strings.LastIndex(clean, "/"); idx != -1 {
+		clean = clean[idx+1:]
+	}
+	return clean
+}
+
+// DisplayIcon represents an icon returned by Yoto's icon APIs.
+type DisplayIcon struct {
+	DisplayIconID string   `json:"displayIconId"`
+	MediaID       string   `json:"mediaId"`
+	Title         string   `json:"title"`
+	URL           string   `json:"url"`
+	UserId        string   `json:"userId"`
+	Public        bool     `json:"public"`
+	New           bool     `json:"new"`
+	PublicTags    []string `json:"publicTags"`
+	CreatedAt     string   `json:"createdAt"`
+}
+
+// DisplayIconsResponse is the response from /media/displayIcons endpoints.
+type DisplayIconsResponse struct {
+	DisplayIcons []DisplayIcon `json:"displayIcons"`
+}
