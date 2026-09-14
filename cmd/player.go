@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/vgaro/yotocli/internal/utils"
 	"github.com/spf13/cobra"
+	"github.com/vgaro/yotocli/internal/utils"
 )
 
 var playCmd = &cobra.Command{
@@ -16,8 +16,8 @@ var playCmd = &cobra.Command{
 		playlistName := args[0]
 
 		// Find Playlist
-	
-cards, err := apiClient.ListCards()
+
+		cards, err := apiClient.ListCards()
 		if err != nil {
 			return err
 		}
@@ -27,8 +27,8 @@ cards, err := apiClient.ListCards()
 		}
 
 		// Find Device
-	
-devices, err := apiClient.ListDevices()
+
+		devices, err := apiClient.ListDevices()
 		if err != nil {
 			return err
 		}
@@ -41,8 +41,8 @@ devices, err := apiClient.ListDevices()
 			query := strings.ToLower(args[1])
 			for _, d := range devices {
 				if strings.Contains(strings.ToLower(d.Name), query) {
-					                    					targetDeviceID = d.ID
-					                    					break
+					targetDeviceID = d.ID
+					break
 				}
 			}
 			if targetDeviceID == "" {
@@ -66,8 +66,8 @@ var stopCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Find Device
-	
-devices, err := apiClient.ListDevices()
+
+		devices, err := apiClient.ListDevices()
 		if err != nil {
 			return err
 		}
@@ -102,8 +102,8 @@ var pauseCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Find Device
-	
-devices, err := apiClient.ListDevices()
+
+		devices, err := apiClient.ListDevices()
 		if err != nil {
 			return err
 		}
@@ -131,7 +131,6 @@ devices, err := apiClient.ListDevices()
 		return apiClient.PausePlayer(targetDeviceID)
 	},
 }
-
 
 func init() {
 	rootCmd.AddCommand(playCmd)

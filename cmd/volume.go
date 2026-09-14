@@ -21,8 +21,7 @@ If no device is specified and you have multiple, it will ask or pick the first o
 			return fmt.Errorf("volume must be a number between 0 and 100")
 		}
 
-	
-devices, err := apiClient.ListDevices()
+		devices, err := apiClient.ListDevices()
 		if err != nil {
 			return err
 		}

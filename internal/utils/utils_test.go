@@ -43,14 +43,14 @@ func TestFindCard(t *testing.T) {
 		wantID   string
 		wantNone bool
 	}{
-		{"1", "uuid-1", false},              // Index match
-		{"2", "uuid-2", false},              // Index match
-		{"uuid-3", "uuid-3", false},         // ID match
-		{"Bedtime", "uuid-1", false},        // Fuzzy Title match
-		{"dance", "uuid-2", false},          // Case-insensitive match
-		{"News", "uuid-3", false},           // Substring match
-		{"NonExistent", "", true},           // No match
-		{"4", "", true},                     // Out of bounds index
+		{"1", "uuid-1", false},       // Index match
+		{"2", "uuid-2", false},       // Index match
+		{"uuid-3", "uuid-3", false},  // ID match
+		{"Bedtime", "uuid-1", false}, // Fuzzy Title match
+		{"dance", "uuid-2", false},   // Case-insensitive match
+		{"News", "uuid-3", false},    // Substring match
+		{"NonExistent", "", true},    // No match
+		{"4", "", true},              // Out of bounds index
 	}
 
 	for _, tt := range tests {

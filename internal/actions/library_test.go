@@ -48,7 +48,7 @@ func TestPerformInsertTrack(t *testing.T) {
 	if card.Content.Chapters[1].Title != "C" {
 		t.Errorf("expected C at index 1, got %s", card.Content.Chapters[1].Title)
 	}
-	
+
 	// Test Append
 	newChap2 := yoto.Chapter{Title: "D"}
 	performInsertTrack(card, newChap2, 5) // > count

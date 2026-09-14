@@ -19,12 +19,12 @@ var uploadIconCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		source := args[0]
 		fmt.Printf("Uploading icon from %s...\n", source)
-		
+
 		id, err := actions.UploadIcon(apiClient, source)
 		if err != nil {
 			return err
 		}
-		
+
 		fmt.Printf("Icon uploaded successfully!\nID: %s\n", id)
 		fmt.Printf("Use this ID with 'yoto edit' or 'yoto icon set'.\n")
 		return nil

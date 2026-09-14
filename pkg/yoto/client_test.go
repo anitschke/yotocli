@@ -110,14 +110,14 @@ func TestUpdateCard(t *testing.T) {
 		if r.URL.Path != "/content" {
 			t.Errorf("Expected path /content, got %s", r.URL.Path)
 		}
-		
+
 		// Verify body
 		var body Card
 		json.NewDecoder(r.Body).Decode(&body)
 		if body.Title != "Updated Title" {
 			t.Errorf("Expected title 'Updated Title', got %s", body.Title)
 		}
-		
+
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
@@ -151,7 +151,7 @@ func TestSanitizeCardForUpdate(t *testing.T) {
 					Display: Display{Icon16x16: url},
 					Tracks: []Track{
 						{
-							Type: "",
+							Type:    "",
 							Display: Display{Icon16x16: ""},
 						},
 					},
@@ -169,54 +169,53 @@ func TestSanitizeCardForUpdate(t *testing.T) {
 	}
 
 	// Check Type injection
-		if card.Content.Chapters[0].Tracks[0].Type != "audio" {
-			t.Errorf("Track Type injection failed. Got %s", card.Content.Chapters[0].Tracks[0].Type)
-		}
+	if card.Content.Chapters[0].Tracks[0].Type != "audio" {
+		t.Errorf("Track Type injection failed. Got %s", card.Content.Chapters[0].Tracks[0].Type)
 	}
-	
-	func TestListDevices(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintln(w, `{"devices": [{"deviceId": "dev1", "name": "Yoto Mini", "online": true}]}`)
-		}))
-		defer server.Close()
-	
-		client := NewClient("fake-token", "fake-client-id")
-		client.http.SetBaseURL(server.URL)
-	
-		devices, err := client.ListDevices()
-		if err != nil {
-			t.Fatalf("ListDevices failed: %v", err)
-		}
-	
-		if len(devices) != 1 {
-			t.Errorf("Expected 1 device, got %d", len(devices))
-		}
-		if devices[0].Name != "Yoto Mini" {
-			t.Errorf("Expected 'Yoto Mini', got %s", devices[0].Name)
-		}
+}
+
+func TestListDevices(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"devices": [{"deviceId": "dev1", "name": "Yoto Mini", "online": true}]}`)
+	}))
+	defer server.Close()
+
+	client := NewClient("fake-token", "fake-client-id")
+	client.http.SetBaseURL(server.URL)
+
+	devices, err := client.ListDevices()
+	if err != nil {
+		t.Fatalf("ListDevices failed: %v", err)
 	}
-	
-	func TestGetDeviceStatus(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintln(w, `{"status": {"batteryLevel": 85, "isCharging": 1, "activeCard": "none"}}`)
-		}))
-		defer server.Close()
-	
-		client := NewClient("fake-token", "fake-client-id")
-		client.http.SetBaseURL(server.URL)
-	
-		status, err := client.GetDeviceStatus("dev1")
-		if err != nil {
-			t.Fatalf("GetDeviceStatus failed: %v", err)
-		}
-	
-		if status.BatteryLevel != 85 {
-			t.Errorf("Expected battery 85, got %d", status.BatteryLevel)
-		}
-		if status.IsCharging != 1 {
-			t.Errorf("Expected charging, got %d", status.IsCharging)
-		}
+
+	if len(devices) != 1 {
+		t.Errorf("Expected 1 device, got %d", len(devices))
 	}
-	
+	if devices[0].Name != "Yoto Mini" {
+		t.Errorf("Expected 'Yoto Mini', got %s", devices[0].Name)
+	}
+}
+
+func TestGetDeviceStatus(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"status": {"batteryLevel": 85, "isCharging": 1, "activeCard": "none"}}`)
+	}))
+	defer server.Close()
+
+	client := NewClient("fake-token", "fake-client-id")
+	client.http.SetBaseURL(server.URL)
+
+	status, err := client.GetDeviceStatus("dev1")
+	if err != nil {
+		t.Fatalf("GetDeviceStatus failed: %v", err)
+	}
+
+	if status.BatteryLevel != 85 {
+		t.Errorf("Expected battery 85, got %d", status.BatteryLevel)
+	}
+	if status.IsCharging != 1 {
+		t.Errorf("Expected charging, got %d", status.IsCharging)
+	}
+}

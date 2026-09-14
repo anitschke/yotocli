@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vgaro/yotocli/internal/utils"
 	"github.com/spf13/cobra"
+	"github.com/vgaro/yotocli/internal/utils"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -36,8 +36,7 @@ If downloading a track, it saves as an MP3 file.`,
 			dest = args[1]
 		}
 
-	
-cards, err := apiClient.ListCards()
+		cards, err := apiClient.ListCards()
 		if err != nil {
 			return err
 		}
@@ -103,7 +102,7 @@ cards, err := apiClient.ListCards()
 			}
 			track := chapter.Tracks[0]
 			trackNum := i + 1
-			
+
 			// Capture variables for goroutine
 			t := track
 			n := trackNum
@@ -111,7 +110,7 @@ cards, err := apiClient.ListCards()
 			g.Go(func() error {
 				filename := fmt.Sprintf("%02d - %s.mp3", n, utils.SanitizeFilename(t.Title))
 				path := filepath.Join(dest, filename)
-				
+
 				fmt.Printf("[%d/%d] Downloading %s...\n", n, len(fullCard.Content.Chapters), t.Title)
 				if err := apiClient.DownloadFile(t.TrackURL, path); err != nil {
 					return fmt.Errorf("failed to download %s: %w", t.Title, err)

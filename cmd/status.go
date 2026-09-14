@@ -17,8 +17,8 @@ var statusCmd = &cobra.Command{
   yoto status`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Fetching devices...")
-	
-devices, err := apiClient.ListDevices()
+
+		devices, err := apiClient.ListDevices()
 		if err != nil {
 			return err
 		}
@@ -54,7 +54,7 @@ devices, err := apiClient.ListDevices()
 		// Print Table
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
 		fmt.Fprintln(w, "Name\tStatus\tBattery\tVolume\tPlaying")
-		
+
 		for _, d := range devices {
 			onlineStr := "Offline"
 			if d.Online {
@@ -72,7 +72,7 @@ devices, err := apiClient.ListDevices()
 				}
 				batteryStr = fmt.Sprintf("%d%%%s", d.Status.BatteryLevel, charging)
 				volumeStr = fmt.Sprintf("%d", d.Status.Volume)
-				
+
 				if d.Status.ActiveCard != "none" && d.Status.ActiveCard != "" {
 					playingStr = d.Status.ActiveCard // Ideally we'd resolve this to a Title
 				} else {

@@ -24,7 +24,7 @@ func NewClient(token, clientID string) *Client {
 	client := resty.New()
 	client.SetBaseURL(BaseURL)
 	client.SetHeader("User-Agent", "Yoto/2.73 (com.yotoplay.Yoto; build:10405; iOS 17.4.0)")
-	
+
 	if token != "" {
 		client.SetAuthToken(token)
 	}
@@ -81,74 +81,74 @@ func (c *Client) DeleteCard(id string) error {
 	if err != nil {
 		return err
 	}
-		if resp.IsError() {
-			return fmt.Errorf("api error: %s", resp.String())
-		}
-		return nil
+	if resp.IsError() {
+		return fmt.Errorf("api error: %s", resp.String())
 	}
-	
-	func (c *Client) PlayCard(deviceID string, cardID string) error {
-		resp, err := c.http.R().
-			SetBody(map[string]string{"cardId": cardID}).
-			Post("/device-v2/" + deviceID + "/play")
-	
-		if err != nil {
-			return err
-		}
-		if resp.IsError() {
-			return fmt.Errorf("api error: %s", resp.String())
-		}
-		return nil
+	return nil
+}
+
+func (c *Client) PlayCard(deviceID string, cardID string) error {
+	resp, err := c.http.R().
+		SetBody(map[string]string{"cardId": cardID}).
+		Post("/device-v2/" + deviceID + "/play")
+
+	if err != nil {
+		return err
 	}
-	
-	func (c *Client) StopPlayer(deviceID string) error {
-		resp, err := c.http.R().
-			Post("/device-v2/" + deviceID + "/stop")
-	
-		if err != nil {
-			return err
-		}
-		if resp.IsError() {
-			return fmt.Errorf("api error: %s", resp.String())
-		}
-		return nil
+	if resp.IsError() {
+		return fmt.Errorf("api error: %s", resp.String())
 	}
-	
-	func (c *Client) PausePlayer(deviceID string) error {
-		resp, err := c.http.R().
-			Post("/device-v2/" + deviceID + "/pause")
-	
-		if err != nil {
-			return err
-		}
-		if resp.IsError() {
-			return fmt.Errorf("api error: %s", resp.String())
-		}
-			return nil
-		}
-		
-		func (c *Client) UploadIcon(path string) (string, error) {
-			var result struct {
-				ID string `json:"id"`
-			}
-		
-			resp, err := c.http.R().
-				SetFile("file", path).
-				SetFormData(map[string]string{"autoConvert": "true"}).
-				SetResult(&result).
-				Post("/media/displayIcons/user/me/upload")
-		
-			if err != nil {
-				return "", err
-			}
-			if resp.IsError() {
-				return "", fmt.Errorf("api error: %s", resp.String())
-			}
-		
-			return result.ID, nil
-		}
-		
-		func (c *Client) UpdateCard(id string, card *Card) error {	// Sanitize icons: Convert https URLs back to yoto:#hash format
+	return nil
+}
+
+func (c *Client) StopPlayer(deviceID string) error {
+	resp, err := c.http.R().
+		Post("/device-v2/" + deviceID + "/stop")
+
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return fmt.Errorf("api error: %s", resp.String())
+	}
+	return nil
+}
+
+func (c *Client) PausePlayer(deviceID string) error {
+	resp, err := c.http.R().
+		Post("/device-v2/" + deviceID + "/pause")
+
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return fmt.Errorf("api error: %s", resp.String())
+	}
+	return nil
+}
+
+func (c *Client) UploadIcon(path string) (string, error) {
+	var result struct {
+		ID string `json:"id"`
+	}
+
+	resp, err := c.http.R().
+		SetFile("file", path).
+		SetFormData(map[string]string{"autoConvert": "true"}).
+		SetResult(&result).
+		Post("/media/displayIcons/user/me/upload")
+
+	if err != nil {
+		return "", err
+	}
+	if resp.IsError() {
+		return "", fmt.Errorf("api error: %s", resp.String())
+	}
+
+	return result.ID, nil
+}
+
+func (c *Client) UpdateCard(id string, card *Card) error { // Sanitize icons: Convert https URLs back to yoto:#hash format
 	sanitizeCardForUpdate(card)
 
 	// The API for content update seems to use the same endpoint as create (Upsert)
@@ -174,7 +174,7 @@ func sanitizeCardForUpdate(card *Card) {
 		fixIcon(&card.Content.Chapters[i].Display)
 		for j := range card.Content.Chapters[i].Tracks {
 			fixIcon(&card.Content.Chapters[i].Tracks[j].Display)
-			
+
 			// Ensure Type is set
 			if card.Content.Chapters[i].Tracks[j].Type == "" {
 				card.Content.Chapters[i].Tracks[j].Type = "audio"
@@ -224,104 +224,80 @@ func (c *Client) DownloadFile(url string, destPath string) error {
 	}
 	defer out.Close()
 
-		_, err = io.Copy(out, resp.RawBody())
+	_, err = io.Copy(out, resp.RawBody())
+
+	return err
+
+}
+
+func (c *Client) ListDevices() ([]Device, error) {
+
+	var result DevicesResponse
+
+	resp, err := c.http.R().
+		SetResult(&result).
+		Get("/device-v2/devices/mine")
+
+	if err != nil {
+
+		return nil, err
+
+	}
+
+	if resp.IsError() {
+
+		return nil, fmt.Errorf("api error: %s", resp.String())
+
+	}
+
+	return result.Devices, nil
+
+}
+
+func (c *Client) GetDeviceStatus(deviceID string) (*DeviceStatus, error) {
+
+	var result struct {
+		Status DeviceStatus `json:"status"`
+	}
+
+	resp, err := c.http.R().
+		SetResult(&result).
+		Get("/device-v2/" + deviceID + "/status")
+
+	if err != nil {
+
+		return nil, err
+
+	}
+
+	if resp.IsError() {
+
+		return nil, fmt.Errorf("api error: %s", resp.String())
+
+	}
+
+	return &result.Status, nil
+
+}
+
+func (c *Client) SetVolume(deviceID string, volume int) error {
+
+	resp, err := c.http.R().
+		SetBody(map[string]int{"volume": volume}).
+		Post("/device-v2/" + deviceID + "/volume")
+
+	if err != nil {
 
 		return err
 
 	}
 
-	
+	if resp.IsError() {
 
-	func (c *Client) ListDevices() ([]Device, error) {
-
-		var result DevicesResponse
-
-		resp, err := c.http.R().
-
-			SetResult(&result).
-
-			Get("/device-v2/devices/mine")
-
-	
-
-		if err != nil {
-
-			return nil, err
-
-		}
-
-		if resp.IsError() {
-
-			return nil, fmt.Errorf("api error: %s", resp.String())
-
-		}
-
-		return result.Devices, nil
+		return fmt.Errorf("api error: %s", resp.String())
 
 	}
 
-	
+	return nil
 
-	func (c *Client) GetDeviceStatus(deviceID string) (*DeviceStatus, error) {
-
-		var result struct {
-
-			Status DeviceStatus `json:"status"`
-
-		}
-
-		resp, err := c.http.R().
-
-			SetResult(&result).
-
-			Get("/device-v2/" + deviceID + "/status")
-
-	
-
-		if err != nil {
-
-			return nil, err
-
-		}
-
-		if resp.IsError() {
-
-			return nil, fmt.Errorf("api error: %s", resp.String())
-
-		}
-
-			return &result.Status, nil
-
-		}
-
-		
-
-		func (c *Client) SetVolume(deviceID string, volume int) error {
-
-			resp, err := c.http.R().
-
-				SetBody(map[string]int{"volume": volume}).
-
-				Post("/device-v2/" + deviceID + "/volume")
-
-		
-
-			if err != nil {
-
-				return err
-
-			}
-
-			if resp.IsError() {
-
-				return fmt.Errorf("api error: %s", resp.String())
-
-			}
-
-			return nil
-
-		}
-
-		
-
-	
+}

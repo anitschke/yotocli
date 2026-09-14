@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/vgaro/yotocli/internal/actions"
 	"github.com/vgaro/yotocli/internal/utils"
-	"github.com/spf13/cobra"
 )
 
 var rmCmd = &cobra.Command{

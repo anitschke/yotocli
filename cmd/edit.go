@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/vgaro/yotocli/internal/utils"
 	"github.com/vgaro/yotocli/pkg/yoto"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -30,13 +30,12 @@ var editCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		query := args[0]
-		
+
 		if editName == "" && editAuthor == "" && editDescription == "" {
 			return fmt.Errorf("no changes specified: use --name, --author, or --description")
 		}
 
-	
-cards, err := apiClient.ListCards()
+		cards, err := apiClient.ListCards()
 		if err != nil {
 			return err
 		}

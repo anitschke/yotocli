@@ -75,13 +75,13 @@ var mvCmd = &cobra.Command{
 		if srcCardRef == nil {
 			return fmt.Errorf("source card not found")
 		}
-		
+
 		// We need to fetch the full card just to find the index if it's a name?
 		// utils.FindChapter takes full card.
 		// Let's reuse utils logic or just call GetCard if needed.
 		// Wait, actions.MoveTrack takes indices.
 		// We need to resolve names to indices here in CLI layer.
-		
+
 		srcCard, err := apiClient.GetCard(srcCardRef.CardID)
 		if err != nil {
 			return err
@@ -122,10 +122,10 @@ var mvCmd = &cobra.Command{
 
 // cpCmd represents the cp command
 var cpCmd = &cobra.Command{
-	Use:   "cp <src_playlist/track> <dest_playlist[/position]>",
-	Short: "Copy a track between playlists",
+	Use:     "cp <src_playlist/track> <dest_playlist[/position]>",
+	Short:   "Copy a track between playlists",
 	Example: `  yoto cp "Bedtime/1" "Lullabies/"`,
-	Args: cobra.ExactArgs(2),
+	Args:    cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		srcParts := strings.Split(args[0], "/")
 		if len(srcParts) < 2 {

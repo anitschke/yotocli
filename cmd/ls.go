@@ -6,9 +6,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/spf13/cobra"
 	"github.com/vgaro/yotocli/internal/utils"
 	"github.com/vgaro/yotocli/pkg/yoto"
-	"github.com/spf13/cobra"
 )
 
 var lsCmd = &cobra.Command{
@@ -34,13 +34,13 @@ Examples:
 		// Handle slash syntax: "Playlist/Track"
 		parts := strings.Split(args[0], "/")
 		cardQuery := parts[0]
-		
+
 		card := utils.FindCard(cards, cardQuery)
 		if card == nil {
 			return fmt.Errorf("card not found: %s", cardQuery)
 		}
 
-		// If it's a basic card from ListCards, it might not have chapters. 
+		// If it's a basic card from ListCards, it might not have chapters.
 		// Fetch full detail.
 		fullCard, err := apiClient.GetCard(card.CardID)
 		if err != nil {
@@ -75,7 +75,7 @@ func printCards(cards []yoto.Card) {
 
 func printChapters(card *yoto.Card) {
 	fmt.Printf("Playlist: %s (%s)\n\n", card.Title, card.CardID)
-	
+
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
 	fmt.Fprintln(w, "#\tTitle\tDuration\tFormat")
 
@@ -139,4 +139,3 @@ func printTrack(card *yoto.Card, query string) {
 func init() {
 	rootCmd.AddCommand(lsCmd)
 }
-

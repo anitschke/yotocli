@@ -70,10 +70,10 @@ func MoveTrack(client *yoto.Client, srcCardID string, srcIndex int, destCardID s
 	// My performInsertTrack inserts *before* the index if it exists.
 	// Insert at 2 (B is idx 0, count 1). 2-1 = 1. >= count? Yes. Append.
 	// [B, A]. Correct.
-	
+
 	// Wait, if I move 1 to 1.
 	// Remove 1. Insert at 1. Same.
-	
+
 	// Issue: If I rely on indices from *before* removal?
 	// `performRemoveTrack` modifies the slice in place.
 	// If srcCard == destCard, the slice is modified.
@@ -82,11 +82,11 @@ func MoveTrack(client *yoto.Client, srcCardID string, srcIndex int, destCardID s
 	// Insert at 2.
 	// This seems fine for "Move A to position X in the resulting list".
 	// But CLI usually implies "Move it so it ends up at position X".
-	
+
 	// Let's keep it simple: Remove, then Insert.
 	// For same-card moves, users usually expect:
 	// "Move 1 to 2" -> [2, 1, 3...]
-	
+
 	performInsertTrack(destCard, chapter, destIndex)
 
 	recalculateMetadata(srcCard)

@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/vgaro/yotocli/internal/actions"
 	"github.com/spf13/cobra"
+	"github.com/vgaro/yotocli/internal/actions"
 )
 
 var (

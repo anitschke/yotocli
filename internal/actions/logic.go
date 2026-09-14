@@ -23,12 +23,12 @@ func performInsertTrack(card *yoto.Card, chapter yoto.Chapter, position int) {
 		card.Content = &yoto.Content{}
 	}
 	count := len(card.Content.Chapters)
-	
+
 	// If position is explicitly requested beyond end, just append.
-	// Logic: 1-based index. 
+	// Logic: 1-based index.
 	// If pos 1, idx 0.
 	// If count 5, pos 6 is append (idx 5).
-	
+
 	idx := position - 1
 	if position < 1 || idx >= count {
 		card.Content.Chapters = append(card.Content.Chapters, chapter)
