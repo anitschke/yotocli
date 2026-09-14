@@ -66,7 +66,7 @@ It allows for uploading files, creating playlists, and managing device state dir
 			// Actually, commands like 'mcp' SHOULD fail if no token.
 			// But 'login' command itself needs to run without token.
 			// Cobra doesn't easily let us skip PersistentPreRunE for specific subcommands cleanly without checking cmd.Name()
-			if cmd.Name() != "login" && cmd.Name() != "help" && cmd.Name() != "completion" && !strings.HasPrefix(cmd.Use, "gen-docs") {
+			if cmd.Name() != "login" && cmd.Name() != "help" && cmd.Name() != "completion" {
 				// We return nil here to let the command logic handle "unauthorized" if it wants, 
 				// but for MCP we really want to fail fast.
 				// Let's rely on the commands failing later if they need auth.

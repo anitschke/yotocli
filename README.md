@@ -27,7 +27,7 @@ sudo mv yoto /usr/local/bin/
 
 ## Usage
 
-For detailed information on every command, see the [Command Documentation](docs/commands/yoto.md).
+For detailed information on every command, use builtin help, ex: `yoto -h`, `yoto status -h`.
 
 ### 1. Authentication
 First, log in to your Yoto account. This opens your browser and uses the OAuth2
