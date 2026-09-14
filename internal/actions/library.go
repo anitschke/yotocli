@@ -81,7 +81,7 @@ func MoveTrack(client *yoto.Client, srcCardID string, srcIndex int, destCardID s
 	// Remove 1. Slice shrinks.
 	// Insert at 2.
 	// This seems fine for "Move A to position X in the resulting list".
-	// But CLI/MCP usually implies "Move it so it ends up at position X".
+	// But CLI usually implies "Move it so it ends up at position X".
 	
 	// Let's keep it simple: Remove, then Insert.
 	// For same-card moves, users usually expect:
