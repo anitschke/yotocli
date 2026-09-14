@@ -9,3 +9,6 @@ config.yaml
 
 # OS
 .DS_Store
+
+# Generated Noto Emoji image assets
+/internal/actions/notoicons/images/

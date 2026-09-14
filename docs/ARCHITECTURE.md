@@ -67,3 +67,22 @@ The API endpoints used are based on reverse-engineering the Yoto Web/App traffic
 - **Base URL:** `https://api.yotoplay.com`
 - **Auth URL:** `https://login.yotoplay.com`
 - **Content:** `POST /content` (Create), `PATCH /content/{id}` (Update), `DELETE /content/{id}` (Delete).
+
+## 5. Icon Providers & Caching
+
+The icon subsystem (`internal/actions/`) provides unified searching, caching, and terminal rendering across multiple icon providers:
+
+- **Interfaces (`Icon`, `IconSearcher`, `Tagger`)**:
+  - `Icon`: Abstracts icon ID, title, provider name, attribution, raw bytes, and SHA-256 digest.
+  - `IconSearcher`: Evaluates multi-keyword queries (`SearchForIcon(keywords []string)`).
+  - `Tagger`: Optional interface exposing tags/keywords for icons (`Tags() []string`).
+- **Supported Providers**:
+  1. **Yoto Official Icons (`YotoIconSearcher`)**: Fetches public icons from the Yoto API, performing exact tag matching and whole-word title matching.
+  2. **Community Icons (`YotoIconsDotComSearcher`)**: Scrapes and parses search results from `yotoicons.com`.
+  3. **Google Noto Emoji (`NotoEmojiSearcher`)**: Fast offline search against 3,700+ color emojis embedded directly into the binary from `googlefonts/noto-emoji` (png/32). At build time, `internal/tools/gennoto` correlates Unicode CLDR annotations into an inverted `TagIndex` map for zero-allocation $O(1)$ search lookups.
+- **Deduplication & Cache (`IconCache`)**:
+  - Stored locally at `~/.cache/yotocli/icons/<provider>/<id>`.
+  - Maintains an in-memory SHA-256 index mapping to `(id, provider)` to avoid redundant uploads to Yoto.
+- **Terminal Rendering**:
+  - 16×16 preview generated via Unicode half-blocks (`▀` and `▄`) and 24-bit truecolor ANSI escape sequences, automatically scaling non-16×16 images (e.g. 32×32 or 128×128) down to 16×16.
+

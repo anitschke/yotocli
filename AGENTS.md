@@ -72,9 +72,11 @@ yotocli/
 ├── pkg/
 │   └── yoto/           # Standalone Yoto API client (HTTP requests, OAuth2, models)
 ├── internal/
-│   ├── actions/        # High-level orchestration (AddTracks, ImportFromURL, etc.)
+│   ├── actions/        # High-level orchestration (AddTracks, ImportFromURL, icon search, etc.)
+│   │   └── notoicons/  # Embedded Google Noto Emoji assets and inverted tag index
 │   ├── config/         # Viper configuration manager (~/.config/yotocli/config.yaml)
 │   ├── processing/     # Audio extraction and external downloader (yt-dlp)
+│   ├── tools/          # Code generation tools (gennoto for Noto Emoji indexing)
 │   └── utils/          # Filename sanitization, index parsing, track/card finders
 ├── docs/               # Architecture documents and notes
 ├── AGENTS.md           # Instructions for AI agents and human contributors
@@ -129,6 +131,15 @@ go test -v ./internal/...
 
 ### Build Binary
 ```bash
-go build -o yoto main.go
+make build
+# or: go generate ./internal/actions/notoicons && go build -o yoto main.go
 ./yoto --help
+```
+
+### Generating Noto Emoji Assets
+To update or regenerate the embedded Noto Emoji assets and inverted tag index:
+```bash
+make generate-noto
+# or
+go generate ./internal/actions/notoicons
 ```

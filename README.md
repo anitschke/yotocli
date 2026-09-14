@@ -21,7 +21,8 @@ A powerful, native command-line interface for managing your Yoto Player library.
 ```bash
 git clone https://github.com/vgaro/yotocli.git
 cd yotocli
-go build -o yoto main.go
+make build
+# or: go generate ./internal/actions/notoicons && go build -o yoto main.go
 sudo mv yoto /usr/local/bin/
 ```
 
@@ -191,6 +192,25 @@ yoto mv "Bedtime/1" "Dance Party/"
 ```bash
 # Duplicate a track to another playlist
 yoto cp "Bedtime/1" "Favorites/"
+```
+
+### 10. Icon Search & Management
+Search across multiple icon providers with ANSI truecolor 16×16 terminal previews:
+
+```bash
+# Search across all icon providers (Yoto public icons, yotoicons.com, and Google Noto Emoji)
+yoto icon search cat
+
+# Search a specific provider
+yoto icon search -p yoto bedtime
+yoto icon search -p yotoicons.com bluey
+yoto icon search -p noto-emoji rocket
+
+# Search with multiple keywords (OR search)
+yoto icon search lion tiger bear
+
+# Upload a custom icon (file or URL)
+yoto icon upload ./my-icon.png
 ```
 
 ## Configuration

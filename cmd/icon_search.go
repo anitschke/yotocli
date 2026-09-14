@@ -30,11 +30,14 @@ var searchIconCmd = &cobra.Command{
 			searchers = append(searchers, actions.NewYotoIconSearcher(apiClient))
 		case "yotoicons", "yotoicons.com":
 			searchers = append(searchers, actions.NewYotoIconsDotComSearcher(nil))
+		case "noto", "noto-emoji":
+			searchers = append(searchers, actions.NewNotoEmojiSearcher())
 		case "all", "":
 			searchers = append(searchers, actions.NewYotoIconSearcher(apiClient))
 			searchers = append(searchers, actions.NewYotoIconsDotComSearcher(nil))
+			searchers = append(searchers, actions.NewNotoEmojiSearcher())
 		default:
-			return fmt.Errorf("unknown provider: %q (supported: all, yoto, yotoicons.com)", searchProvider)
+			return fmt.Errorf("unknown provider: %q (supported: all, yoto, yotoicons.com, noto-emoji)", searchProvider)
 		}
 
 		var allIcons []actions.Icon
@@ -97,6 +100,6 @@ func printIconResult(icon actions.Icon, cache *actions.IconCache) {
 }
 
 func init() {
-	searchIconCmd.Flags().StringVarP(&searchProvider, "provider", "p", "all", "Icon provider to search: all, yoto, yotoicons.com")
+	searchIconCmd.Flags().StringVarP(&searchProvider, "provider", "p", "all", "Icon provider to search: all, yoto, yotoicons.com, noto-emoji")
 	iconCmd.AddCommand(searchIconCmd)
 }
