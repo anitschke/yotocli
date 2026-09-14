@@ -10,30 +10,48 @@ import (
 	"github.com/vgaro/yotocli/internal/actions"
 )
 
+var searchProvider string
+
 var searchIconCmd = &cobra.Command{
 	Use:   "search <keyword> [keywords...]",
 	Short: "Search for icons by title or tag",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		slog.Info("Searching for icons", "keywords", args)
+		slog.Info("Searching for icons", "keywords", args, "provider", searchProvider)
 
 		cache, err := actions.GetDefaultIconCache()
 		if err != nil {
 			slog.Warn("Failed to initialize icon cache", "error", err)
 		}
 
-		searcher := actions.NewYotoIconSearcher(apiClient)
-		icons, err := searcher.SearchForIcon(args)
-		if err != nil {
-			return err
+		var searchers []actions.IconSearcher
+		switch strings.ToLower(strings.TrimSpace(searchProvider)) {
+		case "yoto":
+			searchers = append(searchers, actions.NewYotoIconSearcher(apiClient))
+		case "yotoicons", "yotoicons.com":
+			searchers = append(searchers, actions.NewYotoIconsDotComSearcher(nil))
+		case "all", "":
+			searchers = append(searchers, actions.NewYotoIconSearcher(apiClient))
+			searchers = append(searchers, actions.NewYotoIconsDotComSearcher(nil))
+		default:
+			return fmt.Errorf("unknown provider: %q (supported: all, yoto, yotoicons.com)", searchProvider)
 		}
 
-		if len(icons) == 0 {
+		var allIcons []actions.Icon
+		for _, s := range searchers {
+			icons, err := s.SearchForIcon(args)
+			if err != nil {
+				return err
+			}
+			allIcons = append(allIcons, icons...)
+		}
+
+		if len(allIcons) == 0 {
 			slog.Info("No icons found matching query", "keywords", args)
 			return nil
 		}
 
-		for _, icon := range icons {
+		for _, icon := range allIcons {
 			printIconResult(icon, cache)
 		}
 
@@ -49,8 +67,8 @@ func printIconResult(icon actions.Icon, cache *actions.IconCache) {
 		fmt.Fprintf(os.Stdout, "Attribution: %s\n", attr)
 	}
 
-	if yotoIcon, ok := icon.(*actions.YotoIcon); ok {
-		if tags := yotoIcon.Tags(); len(tags) > 0 {
+	if tagger, ok := icon.(actions.Tagger); ok {
+		if tags := tagger.Tags(); len(tags) > 0 {
 			fmt.Fprintf(os.Stdout, "Tags: %s\n", strings.Join(tags, ", "))
 		}
 	}
@@ -79,5 +97,6 @@ func printIconResult(icon actions.Icon, cache *actions.IconCache) {
 }
 
 func init() {
+	searchIconCmd.Flags().StringVarP(&searchProvider, "provider", "p", "all", "Icon provider to search: all, yoto, yotoicons.com")
 	iconCmd.AddCommand(searchIconCmd)
 }

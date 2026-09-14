@@ -16,6 +16,11 @@ type Icon interface {
 	Attribution() string
 }
 
+// Tagger represents an entity (such as an icon) that has associated tags.
+type Tagger interface {
+	Tags() []string
+}
+
 // IconSearcher searches for icons by keyword across an icon provider.
 type IconSearcher interface {
 	// SearchForIcon finds icons matching any one of the given keywords.
